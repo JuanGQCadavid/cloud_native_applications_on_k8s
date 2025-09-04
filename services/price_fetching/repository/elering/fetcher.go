@@ -1,10 +1,15 @@
 package elering
 
 import (
+	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
+	"github.com/JuanGQCadavid/cloud_native_applications_on_k8s/price_fetching/core/domain"
 	"resty.dev/v3"
 )
 
@@ -22,7 +27,7 @@ func NewEleringFetcher(dns string) *EleringFetcher {
 	}
 }
 
-func (fetcher *EleringFetcher) FetchNextDay() {
+func (fetcher *EleringFetcher) NextDay() (*domain.EnergyPrices, error) {
 	client := resty.New()
 	defer client.Close()
 
@@ -43,4 +48,57 @@ func (fetcher *EleringFetcher) FetchNextDay() {
 
 	log.Println(err, res)
 	log.Println(res.Request.TraceInfo())
+
+	prices, err := fetcher.readCSV(res)
+
+	if err != nil {
+		log.Println("err while saving the csv into struct, err: ", err.Error())
+		return nil, err
+	}
+
+	return &domain.EnergyPrices{
+		From:    begining,
+		To:      end,
+		TakenOn: now,
+		Prices:  prices,
+	}, nil
+}
+
+func (fetcher *EleringFetcher) readCSV(resp *resty.Response) ([]*domain.EnergyPrice, error) {
+	csvData := resp.String()
+	reader := csv.NewReader(strings.NewReader(csvData))
+	reader.Comma = ';'
+
+	var prices []*domain.EnergyPrice
+	_, err := reader.Read()
+	if err != nil {
+		log.Println("err while skiping the header", err.Error())
+		return nil, err
+	}
+
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Println("err while reading", err.Error())
+			return nil, err
+		}
+
+		price, err := strconv.ParseFloat(strings.ReplaceAll(record[2], ",", "."), 32)
+
+		if err != nil {
+			log.Println("err while transforming to float", err.Error())
+			return nil, err
+		}
+
+		prices = append(prices, &domain.EnergyPrice{
+			TimeUTC:      record[0],
+			TimeEestiAeg: record[1],
+			Price:        float32(price),
+		})
+	}
+
+	return prices, nil
 }
