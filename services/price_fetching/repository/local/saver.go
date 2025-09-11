@@ -33,6 +33,7 @@ func (saver *CSVSaver) Save(prices *domain.EnergyPrices) error {
 	defer file.Close()
 
 	writer := csv.NewWriter(file)
+	// writer.Comma = ';'
 	defer writer.Flush()
 
 	writer.Write([]string{"Ajatempel (UTC)", "Kuupäev (Eesti aeg)", "NPS Eesti"})
