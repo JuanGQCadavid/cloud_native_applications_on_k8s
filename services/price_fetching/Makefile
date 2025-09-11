@@ -6,3 +6,8 @@ push:
 
 run:
 	sudo nerdctl run  -v /mnt/price-data:/tmp/price-data/  -d --name price-fetcher-service --insecure-registry 10.4.0.6:5000/price-fetcher-service:latest
+
+kill:
+	sudo nerdctl kill price-fetcher-service && sudo nerdctl rm price-fetcher-service
+
+bitch: kill build push run
