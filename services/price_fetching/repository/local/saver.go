@@ -35,7 +35,7 @@ func (saver *CSVSaver) Save(prices *domain.EnergyPrices) error {
 	writer := csv.NewWriter(file)
 	defer writer.Flush()
 
-	writer.Write([]string{"Ajatempel (UTC)", "Eesti aeg", "NPS Eesti"})
+	writer.Write([]string{"Ajatempel (UTC)", "Kuupäev (Eesti aeg)", "NPS Eesti"})
 
 	for _, r := range prices.Prices {
 		row := []string{
