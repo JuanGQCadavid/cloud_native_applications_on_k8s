@@ -13,7 +13,7 @@ var service *core.Service
 func init() {
 	service = core.NewService(
 		elering.NewEleringFetcher("https://dashboard.elering.ee"),
-		local.NewCSVSaver("/tmp/price-data ", "prices.csv"),
+		local.NewCSVSaver("/tmp/price-data", "prices.csv"),
 	)
 }
 
