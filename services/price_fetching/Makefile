@@ -10,4 +10,7 @@ run:
 kill:
 	sudo nerdctl kill price-fetcher-service && sudo nerdctl rm price-fetcher-service
 
-bitch: kill build push run
+pull:
+	git pull
+
+bitch: pull kill build push run
