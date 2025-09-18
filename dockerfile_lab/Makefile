@@ -3,3 +3,4 @@ build:
 
 push:
 	buildah push --format docker server:latest docker-archive:my.server.tar
+	
